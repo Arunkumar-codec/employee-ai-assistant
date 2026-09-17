@@ -1,0 +1,23 @@
+SYNTHETIC DEMO COMPANY DOCUMENT — for development/testing only.
+Not a real company policy.
+
+LEAVE POLICY
+
+1. Annual Leave
+Full-time employees are entitled to 18 days of paid annual leave per calendar year.
+Unused annual leave up to 5 days may be carried forward to the next year.
+
+2. Sick Leave
+Employees receive 10 days of paid sick leave per year. A medical certificate is
+required for sick leave exceeding 2 consecutive days.
+
+3. Applying for Leave
+Leave requests must be submitted through the internal HR system at least 3 working
+days in advance, except for emergency sick leave. Leave is subject to manager approval.
+
+4. Leave Balance
+Employees can check their remaining leave balance at any time through the HR portal
+or by asking the Employee AI Assistant.
+
+5. Public Holidays
+The company observes 12 public holidays per year, as published annually by HR.

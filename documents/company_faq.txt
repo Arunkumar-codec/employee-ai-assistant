@@ -1,0 +1,23 @@
+SYNTHETIC DEMO COMPANY DOCUMENT — for development/testing only.
+Not a real company policy.
+
+COMPANY FAQ
+
+Q: What are the standard working hours?
+A: Standard working hours are 9:30 AM to 6:30 PM, Monday to Friday, with a
+one-hour lunch break.
+
+Q: How do I get an ID badge replaced?
+A: Contact Facilities via the internal helpdesk portal; replacement badges
+are issued within 2 working days.
+
+Q: Who do I contact for payroll questions?
+A: Payroll queries should be directed to hr-payroll@company-demo.internal.
+
+Q: Can I expense a client lunch?
+A: Yes, client meals are reimbursable under the Travel Policy's expense
+guidelines, with receipts required for amounts over INR 500.
+
+Q: How do I report a workplace concern?
+A: Workplace concerns can be raised confidentially with HR through the
+internal HR portal or by email to hr-confidential@company-demo.internal.

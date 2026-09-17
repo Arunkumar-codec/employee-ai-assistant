@@ -1,0 +1,24 @@
+SYNTHETIC DEMO COMPANY DOCUMENT — for development/testing only.
+Not a real company policy.
+
+TRAVEL POLICY
+
+1. Booking
+All business travel (flights, trains, hotels) must be booked through the
+company travel portal at least 5 working days before departure.
+
+2. Class of Travel
+Economy class is standard for flights under 6 hours. Business class may be
+approved for flights over 6 hours with manager sign-off.
+
+3. Expense Reimbursement
+Meals, local transport, and incidental expenses during business travel are
+reimbursed up to a daily cap of INR 2,500, with receipts required for claims
+over INR 500.
+
+4. Advance Approval
+All international travel requires written approval from the department head
+before booking.
+
+5. Travel Insurance
+The company provides travel insurance for all approved business trips.

@@ -1,0 +1,12 @@
+# Day 1 dependencies only.
+# ChromaDB, sentence-transformers, and an LLM client will be added
+# when their implementation begins (Day 2+), per the Day 1 scope rule.
+
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic==2.10.3
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+
+pytest==8.3.4
+httpx==0.28.1

@@ -1,0 +1,17 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Vector store data (regenerated from documents/)
+vector_store/*
+!vector_store/.gitkeep
+
+# OS
+.DS_Store

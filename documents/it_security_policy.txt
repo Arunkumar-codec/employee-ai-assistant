@@ -1,0 +1,25 @@
+SYNTHETIC DEMO COMPANY DOCUMENT — for development/testing only.
+Not a real company policy.
+
+IT & SECURITY POLICY
+
+1. Password Requirements
+Passwords must be at least 12 characters, changed every 90 days, and must not
+be reused across the last 5 passwords.
+
+2. Two-Factor Authentication
+Two-factor authentication (2FA) is mandatory for all company email, VPN, and
+internal tool accounts.
+
+3. Device Security
+Company laptops must have disk encryption and endpoint protection software
+enabled at all times. Personal devices used for work email must be enrolled
+in the mobile device management (MDM) system.
+
+4. Data Handling
+Confidential company data must not be stored on personal cloud storage
+accounts (e.g., personal Google Drive or Dropbox).
+
+5. Incident Reporting
+Any suspected security incident (phishing email, lost device, unauthorized
+access) must be reported to the IT Security team within 1 hour of discovery.

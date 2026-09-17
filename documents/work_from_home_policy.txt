@@ -1,0 +1,23 @@
+SYNTHETIC DEMO COMPANY DOCUMENT — for development/testing only.
+Not a real company policy.
+
+WORK FROM HOME POLICY
+
+1. Eligibility
+Employees can work from home up to 2 days a week with manager approval.
+
+2. Equipment
+The company provides a laptop and a one-time home-office setup allowance for
+employees who are approved for regular work-from-home arrangements.
+
+3. Availability
+Employees working from home are expected to be reachable during core hours,
+10:00 AM to 4:00 PM local time, and to attend scheduled meetings on video.
+
+4. Full Remote Requests
+Requests for fully remote work (more than 2 days a week) are reviewed on a
+case-by-case basis by the employee's manager and HR.
+
+5. Security
+Employees must use the company VPN when accessing internal systems from home.
+See the IT & Security Policy for details.

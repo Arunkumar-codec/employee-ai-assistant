@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee AI Assistant</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>Employee AI Assistant</h1>
+      <span id="backend-status" class="status status--unknown">Backend: checking…</span>
+    </header>
+
+    <section class="employee-bar">
+      <label for="employee-id">Employee ID</label>
+      <input id="employee-id" type="text" value="EMP001" placeholder="e.g. EMP001" />
+    </section>
+
+    <main id="chat-window" class="chat-window" aria-live="polite">
+      <div class="chat-placeholder">
+        Ask a question below to get started. (Day 1 foundation — real answers
+        are not implemented yet.)
+      </div>
+    </main>
+
+    <section id="error-banner" class="error-banner" hidden></section>
+
+    <footer class="composer">
+      <input
+        id="message-input"
+        type="text"
+        placeholder="Ask a question, e.g. What is the leave policy?"
+        autocomplete="off"
+      />
+      <button id="send-button" type="button">Send</button>
+    </footer>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

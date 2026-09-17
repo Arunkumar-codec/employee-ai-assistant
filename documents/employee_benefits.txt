@@ -1,0 +1,28 @@
+SYNTHETIC DEMO COMPANY DOCUMENT — for development/testing only.
+Not a real company policy.
+
+EMPLOYEE BENEFITS
+
+1. Health Insurance
+All full-time employees are covered under a group health insurance plan from
+day one of employment, extending to spouse and up to two dependent children.
+
+2. Retirement Contribution
+The company matches employee retirement fund contributions up to 8% of base
+salary.
+
+3. Wellness Allowance
+Employees receive an annual wellness allowance of INR 10,000 that can be used
+for gym memberships, fitness classes, or mental health services.
+
+4. Parental Leave
+New parents are eligible for 26 weeks of paid parental leave (primary
+caregiver) or 2 weeks (secondary caregiver).
+
+5. Learning & Development
+Employees receive an annual learning budget of INR 20,000 for courses,
+certifications, and conference attendance, subject to manager approval.
+
+Note: this document intentionally does not mention pet insurance or any
+pet-related benefit — this is used to test the assistant's no-answer /
+hallucination-prevention behavior.
