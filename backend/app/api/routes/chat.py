@@ -1,33 +1,33 @@
-"""
-Chat endpoint.
-
-WHAT: POST /api/chat — accepts {employee_id, message}, returns
-      {answer, sources, tools_used} per the assessment's API contract.
-WHY:  Day 1 goal is API *stability*, not a working AI. The RAG pipeline
-      (Day 2-3) and agent/tool logic (Day 4) do not exist yet, so this
-      route must not fabricate a real answer.
-HOW:  Returns a clearly-labeled "not implemented yet" response using the
-      same response schema the real implementation will use later, so the
-      frontend contract never has to change.
-"""
-from fastapi import APIRouter
-
+"""POST /api/chat with bounded conversation context."""
+import logging
+from fastapi import APIRouter, HTTPException, status
+from app.agent.orchestrator import AgentOrchestrator
 from app.schemas.chat import ChatRequest, ChatResponse
+from app.services.session_service import session_manager
+from app.data.employee_db import db
 
-router = APIRouter()
+logger=logging.getLogger(__name__)
+router=APIRouter(); orchestrator=AgentOrchestrator()
 
-_NOT_IMPLEMENTED_MESSAGE = (
-    "This assistant is not implemented yet (Day 1 foundation). "
-    "The RAG pipeline is planned for Day 2-3 and the agent/tools for Day 4. "
-    "This response is a development stub, not a real answer."
-)
-
-
-@router.post("/chat", response_model=ChatResponse)
+@router.post('/chat', response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
-    # Intentionally no RAG / LLM / agent logic yet — see docstring above.
-    return ChatResponse(
-        answer=_NOT_IMPLEMENTED_MESSAGE,
-        sources=[],
-        tools_used=[],
-    )
+    try:
+        if db.get_employee(request.employee_id) is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
+        try:
+            session=session_manager.get_or_create_session(request.conversation_id, request.employee_id)
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Conversation belongs to another employee')
+        result=orchestrator.process_request(request.message, session.employee_id, session.history)
+        session.add_message('user', request.message, session.employee_id)
+        session.add_message('assistant', result.answer, session.employee_id, result.tools_used, result.sources)
+        return ChatResponse(answer=result.answer, sources=result.sources, tools_used=result.tools_used, conversation_id=session.conversation_id)
+    except HTTPException: raise
+    except Exception:
+        logger.exception('Unexpected error while processing chat request')
+        raise HTTPException(status_code=500, detail='An internal error occurred while processing the request.')
+
+@router.delete('/chat/{conversation_id}')
+def clear_chat(conversation_id: str):
+    if not session_manager.clear_session(conversation_id): raise HTTPException(status_code=404, detail='Conversation session not found.')
+    return {'message':'Conversation cleared.'}

@@ -13,13 +13,13 @@ from app.core.config import settings
 
 app = FastAPI(
     title=settings.app_name,
-    description="RAG + Agentic Employee Assistant (Day 1 foundation)",
-    version="0.1.0",
+    description="RAG + Agentic Employee Assistant",
+    version="1.0.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_origin, "*"],
+    allow_origins=[o.strip() for o in settings.cors_origins.split(",") if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

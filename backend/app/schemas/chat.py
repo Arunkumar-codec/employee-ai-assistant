@@ -1,23 +1,23 @@
-"""
-Pydantic schemas for the /api/chat contract.
-
-WHAT: Request/response models matching the assessment's specified JSON shape.
-WHY:  Fixing this contract on Day 1 lets the frontend and later agent/RAG
-      work (Days 2-5) develop independently against a stable interface.
-HOW:  Standard Pydantic BaseModel with type hints; FastAPI uses these for
-      request validation and response serialization/OpenAPI docs.
-"""
-from typing import List
-
-from pydantic import BaseModel, Field
-
+from typing import List, Optional
+from pydantic import BaseModel, Field, field_validator
 
 class ChatRequest(BaseModel):
-    employee_id: str = Field(..., examples=["EMP001"])
+    employee_id: str = Field(..., min_length=1, examples=["EMP001"])
     message: str = Field(..., examples=["How many leaves do I have?"])
-
+    conversation_id: Optional[str] = None
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, v):
+        if not v or not v.strip(): raise ValueError("Message must not be empty.")
+        return v.strip()
+    @field_validator("employee_id")
+    @classmethod
+    def normalize_employee_id(cls, v):
+        if not v or not v.strip(): raise ValueError("Employee ID must not be empty.")
+        return v.strip().upper()
 
 class ChatResponse(BaseModel):
     answer: str
     sources: List[str] = Field(default_factory=list)
     tools_used: List[str] = Field(default_factory=list)
+    conversation_id: Optional[str] = None

@@ -34,13 +34,12 @@ def test_invalid_route_returns_404():
     assert response.status_code == 404
 
 
-def test_chat_endpoint_returns_stub_not_fake_answer():
-    response = client.post(
-        "/api/chat",
-        json={"employee_id": "EMP001", "message": "What is the leave policy?"},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert "not implemented" in body["answer"].lower()
-    assert body["sources"] == []
-    assert body["tools_used"] == []
+# NOTE: the Day-1 stub test that lived here ("chat endpoint returns stub,
+# not a fake answer") no longer applies — Day 2 replaced the stub with a
+# real RAG implementation in app/services/rag_service.py, wired through
+# app/api/routes/chat.py. That behavior now has its own, more thorough
+# Day-2 test module: backend/tests/test_chat_rag.py (response shape,
+# no-answer shape, validation errors, exception safety net). Keeping a
+# stub-specific assertion here would simply fail against the real
+# implementation without adding coverage beyond what test_chat_rag.py
+# already provides.
