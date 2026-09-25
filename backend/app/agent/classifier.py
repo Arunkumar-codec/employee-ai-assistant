@@ -157,6 +157,7 @@ class IntentClassifier:
         ]
 
         personal_leave_signals = [
+            "how many leaves",
             "leave balance",
             "my leaves",
             "leaves do i have",
