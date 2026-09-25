@@ -12,8 +12,8 @@ WHY:  Whole documents are too large/unfocused to embed as a single vector
 CHUNKING STRATEGY (documented per project instructions — see also
 docs/ARCHITECTURE.md "Chunking Strategy"):
 
-  chunk_size    = settings.chunk_size     (default 700 characters)
-  chunk_overlap = settings.chunk_overlap  (default 120 characters)
+  chunk_size    = settings.chunk_size     (default 500 characters)
+  chunk_overlap = settings.chunk_overlap  (default 50 characters)
 
   WHY THESE NUMBERS, for THIS corpus specifically:
   - The six company documents are short (roughly 700-1400 characters each)
