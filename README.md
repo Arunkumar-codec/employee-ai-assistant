@@ -10,11 +10,40 @@ A FastAPI + RAG + agentic tool-calling assessment project. It answers company-po
 - HTML/CSS/Vanilla JavaScript frontend
 - pytest
 
+
 ## Architecture
-`Frontend -> POST /api/chat -> conversation session -> intent classifier/orchestrator -> RAG and/or employee tools -> answer + sources + tools_used + conversation_id`
 
-RAG pipeline: `documents -> load -> chunk (500/50) -> MiniLM embeddings -> Chroma cosine search (top_k=3) -> grounded context -> Gemini -> answer + metadata-derived sources`.
-
+```text
+Employee / User
+      |
+      v
+Frontend UI (HTML + CSS + JavaScript)
+      |
+      |  POST /api/chat
+      v
+FastAPI Backend
+      |
+      v
+Agent / Orchestrator + Intent Detection
+      |
+      +----> RAG Search ----> Chroma Vector DB
+      |                         |
+      |                         v
+      |                   Relevant Documents
+      |                         |
+      |                         v
+      |                     Gemini LLM
+      |
+      +----> Employee Tool ----> Mock Employee DB
+      |
+      +----> Leave Tool -------> Mock Employee DB
+      |
+      v
+Answer + Sources + Tools Used
+      |
+      v
+Frontend UI
+```
 ## Assessment tools
 - `search_company_documents(query)`
 - `get_employee_info(employee_id)`
