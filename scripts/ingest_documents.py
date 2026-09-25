@@ -26,8 +26,6 @@ import sys
 import time
 from pathlib import Path
 
-# Make `app` importable when run as `python scripts/ingest_documents.py`
-# from the project root (scripts/ is a sibling of backend/, not inside it).
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 
 from app.core.config import settings  # noqa: E402

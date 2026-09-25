@@ -1,44 +1,11 @@
-# Day 1 dependencies
 fastapi==0.115.6
 uvicorn[standard]==0.32.1
 pydantic==2.10.3
 pydantic-settings==2.6.1
 python-dotenv==1.0.1
-
 pytest==8.3.4
 httpx==0.28.1
-
-# --- Day 2: RAG pipeline dependencies ---
-
-# Vector database (persistent, embedded, no separate server to run).
-# Pinned to a pre-1.0 release deliberately: chromadb 1.0.0-1.5.9 has a
-# published critical CVE (CVE-2026-45829, pre-auth code injection via
-# trust_remote_code on the HTTP server's collection-creation endpoint).
-# This project only ever uses chromadb.PersistentClient in-process (see
-# app/rag/vector_store.py) and never runs `chroma run` / the HTTP server,
-# so that CVE's attack surface does not apply here either way — but 0.5.23
-# avoids it outright. If you upgrade chromadb, do not enable
-# trust_remote_code or expose the Chroma HTTP server.
 chromadb==0.5.23
-
-# Local embedding generation (see app/rag/embedder.py for model choice).
 sentence-transformers==3.3.1
-
-# Lightweight PDF text extraction (app/rag/loader.py's PDF loader).
 pypdf==5.1.0
-
-# Current Google Gemini SDK (NOT the legacy, deprecated
-# google-generativeai package). Left as a minimum-version bound rather than
-# an exact pin like the other dependencies above: this sandbox has no
-# network access to verify the exact latest release on PyPI, and pinning a
-# guessed version number risks `pip install` failing outright on your
-# machine. `pip install -r backend/requirements.txt` will resolve the
-# current version; run `pip freeze | findstr google-genai` afterward and
-# pin the exact version here once verified locally, if you want full
-# reproducibility.
 google-genai>=1.0.0
-
-# Not added: LangChain / LlamaIndex. The RAG pipeline here (loader ->
-# chunker -> embedder -> vector_store -> retriever -> rag_service) is
-# plain Python + chromadb + sentence-transformers, per the project's
-# "understand every line" / "no framework without a concrete reason" rule.

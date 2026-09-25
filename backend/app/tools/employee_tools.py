@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Dict, Any
 
 from ..data.employee_db import db
@@ -76,6 +76,12 @@ def apply_leave(employee_id: str, start_date: str, end_date: str, reason: str) -
         return {
             "status": "failure",
             "message": f"Leave application failed: End date ({end_date}) cannot be earlier than start date ({start_date})."
+        }
+
+    if parsed_start < date.today():
+        return {
+            "status": "failure",
+            "message": f"Leave application failed: Start date ({parsed_start}) cannot be in the past."
         }
 
     days_requested = (parsed_end - parsed_start).days + 1

@@ -63,7 +63,6 @@ def test_load_txt_document_normalizes_excessive_blank_lines(tmp_path):
     )
     docs = load_txt_document(file_path)
 
-    # No run of 2+ consecutive blank lines should survive normalization.
     assert "\n\n\n" not in docs[0].text
 
 

@@ -29,8 +29,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from app.core.config import settings  # noqa: E402
 from app.rag.retriever import search_company_documents  # noqa: E402
 
-# The five required manual test questions from the assessment, split into
-# the ones expected to have document support and the one expected not to.
 KNOWN_ANSWER_QUESTIONS = [
     "What is the work from home policy?",
     "How many annual leaves are allowed?",

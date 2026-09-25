@@ -47,3 +47,12 @@ def test_conversation_employee_mismatch_returns_403(monkeypatch):
     cid = first.json()["conversation_id"]
     second = client.post("/api/chat", json={"employee_id":"EMP002", "conversation_id":cid, "message":"hello"})
     assert second.status_code == 403
+
+
+def test_relative_vector_store_path_resolves_from_project_root(monkeypatch):
+    from pathlib import Path
+    from app.core.config import PROJECT_ROOT, Settings
+
+    monkeypatch.setenv("CHROMA_PERSIST_DIRECTORY", "./vector_store")
+    configured = Settings(_env_file=None)
+    assert Path(configured.chroma_persist_directory) == (PROJECT_ROOT / "vector_store").resolve()

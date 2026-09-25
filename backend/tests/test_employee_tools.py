@@ -37,7 +37,7 @@ def test_get_employee_info_invalid_input():
 
 
 def test_apply_leave_success():
-    res = apply_leave("EMP001", "2026-09-20", "2026-09-22", "Vacation travel")
+    res = apply_leave("EMP001", "2026-10-20", "2026-10-22", "Vacation travel")
     assert res["status"] == "success"
     assert res["days_requested"] == 3
     assert res["remaining_balance"] == 9
@@ -46,25 +46,25 @@ def test_apply_leave_success():
 
 
 def test_apply_leave_unknown_employee():
-    res = apply_leave("EMP999", "2026-09-20", "2026-09-22", "Vacation")
+    res = apply_leave("EMP999", "2026-10-20", "2026-10-22", "Vacation")
     assert res["status"] == "failure"
     assert "not found" in res["message"]
 
 
 def test_apply_leave_invalid_dates():
-    res = apply_leave("EMP001", "2026-13-01", "2026-09-22", "Vacation")
+    res = apply_leave("EMP001", "2026-13-01", "2026-10-22", "Vacation")
     assert res["status"] == "failure"
     assert "Invalid date format" in res["message"]
 
 
 def test_apply_leave_end_before_start():
-    res = apply_leave("EMP001", "2026-09-22", "2026-09-20", "Vacation")
+    res = apply_leave("EMP001", "2026-10-22", "2026-10-20", "Vacation")
     assert res["status"] == "failure"
     assert "cannot be earlier" in res["message"]
 
 
 def test_apply_leave_insufficient_balance():
-    res = apply_leave("EMP001", "2026-09-01", "2026-09-15", "Long trip")
+    res = apply_leave("EMP001", "2026-10-01", "2026-10-15", "Long trip")
     assert res["status"] == "failure"
     assert "Insufficient leave balance" in res["message"]
     emp = get_employee_info("EMP001")
@@ -72,7 +72,7 @@ def test_apply_leave_insufficient_balance():
 
 
 def test_apply_leave_empty_reason():
-    res = apply_leave("EMP001", "2026-09-20", "2026-09-22", "   ")
+    res = apply_leave("EMP001", "2026-10-20", "2026-10-22", "   ")
     assert res["status"] == "failure"
     assert "reason must be provided" in res["message"]
 
@@ -87,11 +87,18 @@ def test_leave_applications_recording():
 
 
 def test_multiple_leave_applications_sequential_deduction():
-    res1 = apply_leave("EMP001", "2026-09-01", "2026-09-02", "Trip 1")
+    res1 = apply_leave("EMP001", "2026-10-01", "2026-10-02", "Trip 1")
     assert res1["status"] == "success"
     assert res1["remaining_balance"] == 10
-    res2 = apply_leave("EMP001", "2026-09-10", "2026-09-12", "Trip 2")
+    res2 = apply_leave("EMP001", "2026-10-10", "2026-10-12", "Trip 2")
     assert res2["status"] == "success"
     assert res2["remaining_balance"] == 7
     emp = get_employee_info("EMP001")
     assert emp["leave_balance"] == 7
+
+
+def test_apply_leave_rejects_past_start_date():
+    res = apply_leave("EMP001", "2025-09-25", "2025-09-30", "Old request")
+    assert res["status"] == "failure"
+    assert "cannot be in the past" in res["message"]
+    assert get_employee_info("EMP001")["leave_balance"] == 12

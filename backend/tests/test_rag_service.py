@@ -73,7 +73,7 @@ def test_relevant_question_returns_grounded_answer_with_sources(monkeypatch):
         rag_service, "search_company_documents", lambda q, top_k=None: _relevant_chunks()
     )
     fake_llm = _FakeLLM()
-    monkeypatch.setattr(rag_service, "get_llm_service", lambda provider, model, key: fake_llm)
+    monkeypatch.setattr(rag_service, "get_llm_service", lambda provider, model, key, fallback_key="": fake_llm)
 
     result = rag_service.answer_question("How many annual leaves are allowed?")
 
@@ -108,7 +108,7 @@ def test_llm_failure_returns_clear_message_without_fake_sources(monkeypatch):
     monkeypatch.setattr(
         rag_service, "search_company_documents", lambda q, top_k=None: _relevant_chunks()
     )
-    monkeypatch.setattr(rag_service, "get_llm_service", lambda provider, model, key: _FailingLLM())
+    monkeypatch.setattr(rag_service, "get_llm_service", lambda provider, model, key, fallback_key="": _FailingLLM())
 
     result = rag_service.answer_question("How many annual leaves are allowed?")
 
@@ -130,8 +130,52 @@ def test_duplicate_sources_across_chunks_are_deduplicated(monkeypatch):
     monkeypatch.setattr(
         rag_service, "search_company_documents", lambda q, top_k=None: [chunk_a, chunk_b]
     )
-    monkeypatch.setattr(rag_service, "get_llm_service", lambda provider, model, key: _FakeLLM())
+    monkeypatch.setattr(rag_service, "get_llm_service", lambda provider, model, key, fallback_key="": _FakeLLM())
 
     result = rag_service.answer_question("What is the leave policy?")
 
     assert result.sources == ["leave_policy.txt"]  # deduplicated, not ["leave_policy.txt", "leave_policy.txt"]
+
+
+def test_only_threshold_passing_chunks_become_sources(monkeypatch):
+    good = _relevant_chunks()[0]
+    weak = _FakeChunk("travel.txt::0000", "Travel text", "travel_policy.txt", "travel", None, 1.5)
+    monkeypatch.setattr(rag_service, "search_company_documents", lambda q, top_k=None: [good, weak])
+    monkeypatch.setattr(rag_service, "get_llm_service", lambda provider, model, key, fallback_key="": _FakeLLM())
+    result = rag_service.answer_question("What is the leave policy?")
+    assert result.sources == ["leave_policy.txt"]
+
+
+def test_retrieval_failure_returns_controlled_fallback(monkeypatch):
+    def fail(*args, **kwargs):
+        raise RuntimeError("vector store unavailable")
+    monkeypatch.setattr(rag_service, "search_company_documents", fail)
+    result = rag_service.answer_question("What is the leave policy?")
+    assert "knowledge base" in result.answer.lower()
+    assert result.sources == []
+    assert result.tools_used == ["search_company_documents"]
+
+
+def test_broad_leave_policy_prompt_explicitly_allows_grounded_summary(monkeypatch):
+    monkeypatch.setattr(rag_service, "search_company_documents", lambda q, top_k=None: _relevant_chunks())
+    fake_llm = _FakeLLM("Full-time employees receive 18 days of annual leave per year.")
+    monkeypatch.setattr(rag_service, "get_llm_service", lambda provider, model, key, fallback_key="": fake_llm)
+
+    result = rag_service.answer_question("What is the leave policy?")
+
+    assert result.answer.startswith("Full-time employees")
+    assert "broad" in fake_llm.received[0].lower()
+    assert result.sources == ["leave_policy.txt"]
+
+
+def test_source_list_omits_chunk_that_does_not_support_generated_answer(monkeypatch):
+    insurance = _FakeChunk("benefits::1", "Health insurance covers employees and dependents.", "employee_benefits.txt", "benefits", None, 0.3)
+    travel = _FakeChunk("travel::1", "Approved business trips include travel insurance coverage.", "travel_policy.txt", "travel", None, 0.4)
+    security = _FakeChunk("security::1", "Company laptops require disk encryption and endpoint protection.", "it_security_policy.txt", "security", None, 0.5)
+    monkeypatch.setattr(rag_service, "search_company_documents", lambda q, top_k=None: [insurance, travel, security])
+    fake_llm = _FakeLLM("Employees have health insurance for dependents and travel insurance for approved business trips.")
+    monkeypatch.setattr(rag_service, "get_llm_service", lambda provider, model, key, fallback_key="": fake_llm)
+
+    result = rag_service.answer_question("Tell me about insurance provided by the company")
+
+    assert result.sources == ["employee_benefits.txt", "travel_policy.txt"]

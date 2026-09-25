@@ -29,7 +29,7 @@ python -m venv .venv-x64
 .\.venv-x64\Scripts\Activate.ps1
 python -m pip install -r backend\requirements.txt
 Copy-Item .env.example .env
-# Edit .env and set LLM_API_KEY to your Gemini API key.
+# Edit .env and set LLM_API_KEY. LLM_FALLBACK_API_KEY is optional.
 $env:PYTHONPATH="backend"
 python scripts\ingest_documents.py --rebuild
 python -m uvicorn app.main:app --port 8000
@@ -50,7 +50,7 @@ Open Swagger at `http://127.0.0.1:8000/docs`. The static frontend is in `fronten
 $env:PYTHONPATH="backend"
 python -m pytest backend\tests -v
 ```
-The Phase 7 package build passed 90 deterministic tests in the build environment. Re-run them on the target Windows environment before submission, then run the live A1-A7 acceptance suite in `docs/ASSESSMENT_TEST_CASES.md` with a configured Gemini key and ingested vector store.
+The current package build passed 98 deterministic tests in the build environment. Re-run them on the target Windows environment before submission, then run the live A1-A7 acceptance suite in `docs/ASSESSMENT_TEST_CASES.md` with a configured Gemini key and ingested vector store.
 
 ## Security and reliability
-The project keeps secrets in environment configuration, uses explicit configurable CORS origins, sanitizes unexpected HTTP errors, validates requests, isolates conversations by employee, renders dynamic frontend text with safe DOM APIs, retries transient Gemini failures up to three attempts, and prevents follow-up balance checks from replaying leave actions. These are assessment-level controls, not a claim of production-grade authentication/security.
+The project keeps secrets in environment configuration, uses explicit configurable CORS origins, sanitizes unexpected HTTP errors, validates requests, isolates conversations by employee, renders dynamic frontend text with safe DOM APIs, supports a secondary Gemini API key for transient quota/capacity failover with bounded retries, and prevents follow-up balance checks from replaying leave actions. These are assessment-level controls, not a claim of production-grade authentication/security.

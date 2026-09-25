@@ -34,13 +34,20 @@ def normalize_date_string(
 
     cleaned = date_str.strip()
 
-    # Already in ISO format.
     if re.fullmatch(r"\d{4}-\d{2}-\d{2}", cleaned):
         try:
             datetime.strptime(cleaned, "%Y-%m-%d")
             return cleaned
         except ValueError:
             return None
+
+    if re.fullmatch(r"\d{1,2}[/-]\d{1,2}[/-]\d{4}", cleaned):
+        for fmt in ("%d/%m/%Y", "%d-%m-%Y"):
+            try:
+                return datetime.strptime(cleaned, fmt).strftime("%Y-%m-%d")
+            except ValueError:
+                continue
+        return None
 
     months = {
         "jan": 1,
@@ -105,6 +112,7 @@ class IntentClassifier:
             settings.llm_provider,
             settings.llm_model,
             settings.llm_api_key,
+            settings.llm_fallback_api_key,
         )
 
     def classify(
@@ -114,11 +122,6 @@ class IntentClassifier:
     ) -> StructuredIntentOutput:
         msg_lower = message.lower()
 
-        # ------------------------------------------------------------
-        # 1. ACTION REQUESTS
-        # ------------------------------------------------------------
-        # Leave application is an action and therefore gets priority
-        # over policy keywords that might appear in the same message.
         apply_signals = [
             "apply leave",
             "apply for leave",
@@ -128,15 +131,16 @@ class IntentClassifier:
             "submit leave",
         ]
 
-        if any(signal in msg_lower for signal in apply_signals):
+        has_leave_action = any(signal in msg_lower for signal in apply_signals) or bool(
+            re.search(r"\b(?:i\s+)?(?:want|need|would like|give me)\b.{0,30}\bleave\b", msg_lower)
+        )
+
+        if has_leave_action:
             return self._classify_fallback(
                 message,
                 explicit_employee_id,
             )
 
-        # ------------------------------------------------------------
-        # 2. POLICY / DOCUMENT QUESTIONS
-        # ------------------------------------------------------------
         policy_signals = [
             "policy",
             "allowed",
@@ -152,9 +156,6 @@ class IntentClassifier:
             "travel policy",
         ]
 
-        # ------------------------------------------------------------
-        # 3. PERSONAL EMPLOYEE / LEAVE-BALANCE QUESTIONS
-        # ------------------------------------------------------------
         personal_leave_signals = [
             "leave balance",
             "my leaves",
@@ -175,35 +176,18 @@ class IntentClassifier:
             for signal in personal_leave_signals
         )
 
-        # Policy only:
-        #
-        # "How many annual leaves are allowed?"
-        # "What is the leave policy?"
-        #
-        # These must search company documents instead of returning
-        # the employee's personal leave balance.
         if is_policy_question and not is_personal_question:
             return StructuredIntentOutput(
                 intent=IntentEnum.RAG_ONLY,
                 employee_id=explicit_employee_id,
             )
 
-        # Combined:
-        #
-        # "What is the leave policy and how many leaves do I have?"
-        #
-        # Requires both document search and employee lookup.
         if is_policy_question and is_personal_question:
             return StructuredIntentOutput(
                 intent=IntentEnum.RAG_AND_EMPLOYEE_INFO,
                 employee_id=explicit_employee_id,
             )
 
-        # ------------------------------------------------------------
-        # 4. LLM CLASSIFICATION
-        # ------------------------------------------------------------
-        # For requests not covered by deterministic high-confidence
-        # rules, use the LLM classifier.
         llm_result = self._classify_with_llm(
             message,
             explicit_employee_id,
@@ -212,9 +196,6 @@ class IntentClassifier:
         if llm_result is not None:
             return llm_result
 
-        # ------------------------------------------------------------
-        # 5. DETERMINISTIC FALLBACK
-        # ------------------------------------------------------------
         return self._classify_fallback(
             message,
             explicit_employee_id,
@@ -291,6 +272,10 @@ Use null for missing employee_id, dates, or reason.
             if not data.get("employee_id") and explicit_employee_id:
                 data["employee_id"] = explicit_employee_id
 
+            reason = data.get("reason")
+            if reason and str(reason).strip().lower() not in message.lower():
+                data["reason"] = None
+
             data["start_date"] = normalize_date_string(
                 data.get("start_date")
             )
@@ -302,9 +287,6 @@ Use null for missing employee_id, dates, or reason.
             return StructuredIntentOutput(**data)
 
         except Exception:
-            # If the LLM is unavailable, returns malformed JSON,
-            # or classification fails for any other reason, the
-            # deterministic fallback will handle the request.
             return None
 
     def _classify_fallback(
@@ -329,14 +311,10 @@ Use null for missing employee_id, dates, or reason.
         is_apply = any(
             keyword in msg_lower
             for keyword in [
-                "apply leave",
-                "apply for leave",
-                "request leave",
-                "book leave",
-                "take leave",
-                "submit leave",
+                "apply leave", "apply for leave", "request leave",
+                "book leave", "take leave", "submit leave",
             ]
-        )
+        ) or bool(re.search(r"\b(?:i\s+)?(?:want|need|would like|give me)\b.{0,30}\bleave\b", msg_lower))
 
         is_emp_info = any(
             keyword in msg_lower
@@ -370,16 +348,18 @@ Use null for missing employee_id, dates, or reason.
             ]
         )
 
-        # ------------------------------------------------------------
-        # APPLY LEAVE
-        # ------------------------------------------------------------
         if is_apply:
+            month_names = (
+                r"Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|"
+                r"Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?|tember)?|"
+                r"Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?"
+            )
             dates = re.findall(
-                r"\b("
-                r"\d{1,2}\s+[A-Za-z]+(?:\s+\d{4})?"
-                r"|"
-                r"\d{4}-\d{2}-\d{2}"
-                r")\b",
+                rf"\b("
+                rf"\d{{1,2}}\s+(?:{month_names})(?:\s+\d{{4}})?"
+                rf"|\d{{4}}-\d{{2}}-\d{{2}}"
+                rf"|\d{{1,2}}[/-]\d{{1,2}}[/-]\d{{4}}"
+                rf")\b",
                 message,
                 re.IGNORECASE,
             )
@@ -433,27 +413,18 @@ Use null for missing employee_id, dates, or reason.
                 reason=reason,
             )
 
-        # ------------------------------------------------------------
-        # RAG + EMPLOYEE INFO
-        # ------------------------------------------------------------
         if is_rag and is_emp_info:
             return StructuredIntentOutput(
                 intent=IntentEnum.RAG_AND_EMPLOYEE_INFO,
                 employee_id=emp_id,
             )
 
-        # ------------------------------------------------------------
-        # EMPLOYEE INFO
-        # ------------------------------------------------------------
         if is_emp_info or (emp_id and not is_rag):
             return StructuredIntentOutput(
                 intent=IntentEnum.EMPLOYEE_INFO,
                 employee_id=emp_id,
             )
 
-        # ------------------------------------------------------------
-        # DEFAULT: DOCUMENT / RAG QUESTION
-        # ------------------------------------------------------------
         return StructuredIntentOutput(
             intent=IntentEnum.RAG_ONLY,
             employee_id=emp_id,

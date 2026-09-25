@@ -24,7 +24,6 @@ class _FakeModel:
                 self._texts = texts
 
             def tolist(self):
-                # one short deterministic "vector" per text, based on length
                 return [[float(len(t)), 0.0, 1.0] for t in self._texts]
 
         return _FakeVectors(texts)

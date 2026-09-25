@@ -52,8 +52,6 @@ from typing import List
 
 from app.rag.loader import LoadedDocument
 
-# Natural split points to prefer, in priority order (paragraph, then
-# sentence-ish, then just a space) before falling back to a hard cut.
 _SPLIT_BOUNDARIES = ["\n\n", ". ", "\n", " "]
 
 
@@ -128,8 +126,6 @@ def chunk_document(
             break
         start = max(0, end - chunk_overlap)
 
-    # Merge a very small trailing fragment into the previous chunk instead
-    # of shipping a near-empty, low-signal chunk to the embedder.
     _MIN_CHUNK_CHARS = 40
     if len(chunks) > 1 and len(chunks[-1]) < _MIN_CHUNK_CHARS:
         chunks[-2] = (chunks[-2] + " " + chunks.pop()).strip()

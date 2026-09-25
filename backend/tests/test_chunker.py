@@ -30,8 +30,6 @@ def test_short_document_produces_single_chunk():
 
 
 def test_long_document_produces_multiple_chunks_with_no_empty_chunks():
-    # Build text well beyond one chunk_size using repeated numbered sections,
-    # similar in shape to the real company documents.
     section = "This is a policy section with enough text to matter. " * 5
     text = "\n\n".join(f"{i}. Section {i}\n{section}" for i in range(1, 8))
     doc = _doc(text)
@@ -69,9 +67,6 @@ def test_overlap_is_applied_between_consecutive_chunks():
     chunks = chunk_document(doc, CHUNK_SIZE, CHUNK_OVERLAP)
     assert len(chunks) > 1
 
-    # The tail of one chunk and the head of the next should share some
-    # overlapping words (exact boundary depends on natural split points,
-    # so check for *some* shared vocabulary rather than an exact substring).
     first_tail_words = set(chunks[0].content.split()[-10:])
     second_head_words = set(chunks[1].content.split()[:20])
     assert first_tail_words & second_head_words
